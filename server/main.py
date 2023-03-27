@@ -4,7 +4,9 @@ from configparser import ConfigParser
 from common.server import Server
 import logging
 import os
-
+import signal
+from functools import partial
+import sys
 
 def initialize_config():
     """ Parse env variables or config file to find program config params
@@ -47,12 +49,18 @@ def main():
     logging.debug(f"action: config | result: success | port: {port} | "
                   f"listen_backlog: {listen_backlog} | logging_level: {logging_level}")
 
-    # Initialize server and start server loop
-    server = Server(port, listen_backlog)
+    # Initialize server and start server loop    
+    server = Server(port, listen_backlog)        
+    signal.signal(signal.SIGTERM, partial(handle_sigterm, server))
     server.run()
 
+def handle_sigterm(server, signum, frame):
+    server.stop()
+    logging.info(f"Sigterm received with signum {signum} frame {frame}") 
+    sys.exit()   
+
 def initialize_log(logging_level):
-    """
+    """args=[server]
     Python custom logging initialization
 
     Current timestamp is added to be able to identify in docker
