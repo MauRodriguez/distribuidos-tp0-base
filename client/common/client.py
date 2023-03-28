@@ -1,21 +1,26 @@
 import socket
 import logging
-from datetime import datetime, timedelta
 import time
 
 class Client:
-    def __init__(self, server_address, loop_period, loop_lapse, id):
+    def __init__(self, config_params):
 
         self._client_socket = None
 
-        split_info = server_address.split(":")
+        split_info = config_params["server_address"].split(":")
         self._server_address = (split_info[0],int(split_info[1]))
 
-        self._loop_period = loop_period
-        self._loop_lapse = loop_lapse
+        self._loop_period = config_params["loop_period"]
+        self._loop_lapse = config_params["loop_lapse"]
         self._keep_running = True
-        self._client_id = id
+        self._client_id = config_params["id"]
         self._current_msg_id = 1
+
+        self._bet = ';'.join([config_params["apuesta_nombre"],
+                    config_params["apuesta_apellido"],
+                    config_params["apuesta_documento"],
+                    config_params["apuesta_nacimiento"],
+                    config_params["apuesta_numero"]])
 
     def run(self):
         timeout = time.monotonic() + self._loop_lapse        
