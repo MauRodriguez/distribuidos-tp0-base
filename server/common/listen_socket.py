@@ -11,6 +11,7 @@ class ListenSocket:
     
     def bind_and_listen(self):
         try:
+            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self._socket.bind((self._dir, self._port))
             self._socket.listen(self._listen_backlog)
             logging.debug(f"action: bind_and_listen | result: success | error: {repr(e)}")
@@ -23,7 +24,7 @@ class ListenSocket:
         skt, addr = self._socket.accept()
         logging.info(f'action: accept_connections | result: success | ip: {addr[0]}')
 
-        return PeerSocket(skt), addr
+        return PeerSocket(skt, addr)
 
     def close(self):
         self._socket.close()

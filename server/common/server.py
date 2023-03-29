@@ -2,6 +2,8 @@ import socket
 import logging
 from peer_socket import PeerSocket
 from listen_socket import ListenSocket
+from utils import Bet
+from utils import store_bets
 BET_CODE = "B"
 RESULT_CODE = "R"
 WAIT_CODE = "W"
@@ -9,27 +11,18 @@ OK_CODE = "O"
 CLIENT_NUMBER = 5
 
 class Server:
-    def __init__(self, port, listen_backlog):
-        # Initialize server socket
-        self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket = ListenSocket(('', port), listen_backlog)
-        server_socket.bind_and_listen()
-        
+    def __init__(self, port, listen_backlog):        
+        self._server_socket = ListenSocket(('', port), listen_backlog)
+        self._server_socket.bind_and_listen()
+        self._bets = []        
         self._client_socket = None
         self._keep_running = True
         self._client_finished = 0
 
-    def run(self):
-        """
-        Dummy Server loop
-
-        Server that accept a new connections and establishes a
-        communication with a client. After client with communucation
-        finishes, servers starts to accept new connections again
-        """        
+    def run(self):    
         while self._keep_running:
             self._client_socket = self._accept_new_connection()
-            self._handle_client_connection(self._client_socket, BET_CODE)
+            self._handle_client_connection(BET_CODE)
 
     def stop(self):
         self._keep_running = False
@@ -37,34 +30,29 @@ class Server:
         self._server_socket.close()
         logging.info("Gracefully closing server sockets")
 
-    def _handle_client_connection(self, client_sock, spected_code):
-        """
-        Read message from a specific client socket and closes the socket
-
-        If a problem arises in the communication with the client, the
-        client socket will also be closed
-        """
-        try:
+    def _handle_client_connection(self, spected_code):
+        try:            
+            code = self._client_sock.recv(len(spected_code.encode())).decode('utf-8')
+            msg_lenght = int.from_bytes(self._client_sock.recv(6), "little",signed=False)            
             
-            code = client_sock.recv(len(spected_code.encode())).rstrip().decode('utf-8')
-            addr = client_sock.getpeername()
+            if code == BET_CODE:
+                msg_received = self._client_sock.recv(msg_lenght).decode('utf-8').split(';')
+                self._bets.append(Bet(self._client_socket.get_name(), msg_received[0], msg_received[1], msg_received[2]
+                                , msg_received[3], msg_received[4]))
+                store_bets(self._bets.pop())
+                self._client_sock.send(OK_CODE.encode('utf-8'))
+
             logging.info(f'action: receive_message | result: success | ip: {addr[0]} | msg: {msg}')
             
-            client_sock.send("{}\n".format(msg).encode('utf-8'))
+            
         except OSError as e:
             logging.error("action: receive_message | result: fail | error: {e}")
         finally:
             logging.debug("action: client_close | result: success")
-            client_sock.close()
+            self._client_sock.close()
 
     def _accept_new_connection(self):
-        """
-        Accept new connections
-
-        Function blocks until a connection to a client is made.
-        Then connection created is printed and returned
-        """
         
         logging.info('action: accept_connections | result: in_progress')
-        peer_skt, addr = self._server_socket.accept()        
+        peer_skt = self._server_socket.accept()                
         return peer_skt

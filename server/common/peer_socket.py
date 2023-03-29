@@ -2,8 +2,9 @@ import socket
 import logging
 
 class PeerSocket:
-    def __init__(self, socket):
+    def __init__(self, socket, addr):
         self._socket = socket    
+        self._addr = addr
 
     def close(self):
         self._socket.close()
@@ -26,3 +27,6 @@ class PeerSocket:
             logging.debug(f"action: sendall | result: success | msg: {msg}")
         except socket.error as e:
             logging.error(f"action: sendall | result: error | error: {repr(e)}")
+    
+    def get_name(self):
+        return self._addr
