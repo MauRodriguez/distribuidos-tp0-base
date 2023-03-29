@@ -1,6 +1,6 @@
 import logging
 import time
-from cust_socket import Socket
+from connect_socket import ConnectSocket
 MAX_MSG_LENGHT = 8000
 BET_CODE = "B"
 RESULT_CODE = "R"
@@ -11,7 +11,7 @@ class Client:
     def __init__(self, config_params):
         split_info = config_params["server_address"].split(":")
 
-        self._client_socket = Socket((split_info[0],int(split_info[1])))
+        self._client_socket = ConnectSocket((split_info[0],int(split_info[1])))
         self._loop_period = config_params["loop_period"]
         self._loop_lapse = config_params["loop_lapse"]
         self._keep_running = True

@@ -1,18 +1,23 @@
 import socket
 import logging
+from peer_socket import PeerSocket
+from listen_socket import ListenSocket
 BET_CODE = "B"
 RESULT_CODE = "R"
 WAIT_CODE = "W"
 OK_CODE = "O"
+CLIENT_NUMBER = 5
 
 class Server:
     def __init__(self, port, listen_backlog):
         # Initialize server socket
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._server_socket.bind(('', port))
-        self._server_socket.listen(listen_backlog)
+        server_socket = ListenSocket(('', port), listen_backlog)
+        server_socket.bind_and_listen()
+        
         self._client_socket = None
         self._keep_running = True
+        self._client_finished = 0
 
     def run(self):
         """
@@ -23,8 +28,8 @@ class Server:
         finishes, servers starts to accept new connections again
         """        
         while self._keep_running:
-            self._client_socket = self.__accept_new_connection()
-            self.__handle_client_connection(self._client_socket)
+            self._client_socket = self._accept_new_connection()
+            self._handle_client_connection(self._client_socket, BET_CODE)
 
     def stop(self):
         self._keep_running = False
@@ -32,7 +37,7 @@ class Server:
         self._server_socket.close()
         logging.info("Gracefully closing server sockets")
 
-    def __handle_client_connection(self, client_sock):
+    def _handle_client_connection(self, client_sock, spected_code):
         """
         Read message from a specific client socket and closes the socket
 
@@ -41,7 +46,7 @@ class Server:
         """
         try:
             
-            msg = client_sock.recv(1024).rstrip().decode('utf-8')
+            code = client_sock.recv(len(spected_code.encode())).rstrip().decode('utf-8')
             addr = client_sock.getpeername()
             logging.info(f'action: receive_message | result: success | ip: {addr[0]} | msg: {msg}')
             
@@ -52,7 +57,7 @@ class Server:
             logging.debug("action: client_close | result: success")
             client_sock.close()
 
-    def __accept_new_connection(self):
+    def _accept_new_connection(self):
         """
         Accept new connections
 
@@ -61,6 +66,5 @@ class Server:
         """
         
         logging.info('action: accept_connections | result: in_progress')
-        c, addr = self._server_socket.accept()
-        logging.info(f'action: accept_connections | result: success | ip: {addr[0]}')
-        return c
+        peer_skt, addr = self._server_socket.accept()        
+        return peer_skt

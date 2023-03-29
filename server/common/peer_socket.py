@@ -1,20 +1,9 @@
 import socket
 import logging
 
-class Socket:
-    def __init__(self, address):
-        self._socket = None
-        self._address = address
-    
-    def connect(self):
-        try:
-            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self._socket.connect(self._address)
-            logging.debug(f"action: connect | result: success | error: {repr(e)}")
-        except socket.timeout as e:
-            logging.error(f"action: connect | result: error | error: {repr(e)}")
-        except socket.error as e:
-            logging.error(f"action: connect | result: error | error: {repr(e)}")
+class PeerSocket:
+    def __init__(self, socket):
+        self._socket = socket    
 
     def close(self):
         self._socket.close()
