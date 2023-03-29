@@ -64,7 +64,7 @@ class Client:
             received_msg = self._client_socket.recv_msg(len(SPECTED_CODE.encode()))
             if(received_msg != SPECTED_CODE):
                 raise Exception("Message received not match with spected")
+            logging.debug(f"action: recv_msg | result: success | bytes_recv: {len(received_msg.encode())}")
+            return received_msg
         except Exception as e:
             logging.error(f"action: recv_msg | result: error | error: {e.args}")            
-        logging.debug(f"action: recv_msg | result: success | bytes_recv: {len(received_msg.encode())}")
-        return received_msg
