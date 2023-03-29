@@ -1,5 +1,9 @@
 import socket
 import logging
+BET_CODE = "B"
+RESULT_CODE = "R"
+WAIT_CODE = "W"
+OK_CODE = "O"
 
 class Server:
     def __init__(self, port, listen_backlog):
@@ -17,10 +21,7 @@ class Server:
         Server that accept a new connections and establishes a
         communication with a client. After client with communucation
         finishes, servers starts to accept new connections again
-        """
-
-        # TODO: Modify this program to handle signal to graceful shutdown
-        # the server
+        """        
         while self._keep_running:
             self._client_socket = self.__accept_new_connection()
             self.__handle_client_connection(self._client_socket)
@@ -39,11 +40,11 @@ class Server:
         client socket will also be closed
         """
         try:
-            # TODO: Modify the receive to avoid short-reads
+            
             msg = client_sock.recv(1024).rstrip().decode('utf-8')
             addr = client_sock.getpeername()
             logging.info(f'action: receive_message | result: success | ip: {addr[0]} | msg: {msg}')
-            # TODO: Modify the send to avoid short-writes
+            
             client_sock.send("{}\n".format(msg).encode('utf-8'))
         except OSError as e:
             logging.error("action: receive_message | result: fail | error: {e}")
@@ -58,8 +59,7 @@ class Server:
         Function blocks until a connection to a client is made.
         Then connection created is printed and returned
         """
-
-        # Connection arrived
+        
         logging.info('action: accept_connections | result: in_progress')
         c, addr = self._server_socket.accept()
         logging.info(f'action: accept_connections | result: success | ip: {addr[0]}')

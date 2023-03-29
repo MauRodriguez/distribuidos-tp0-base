@@ -45,13 +45,13 @@ class Client:
 
     def _send_msg(self, msg):
         try:
-            msg_encoded = msg.encode()
+            msg_encoded = msg.encode('utf-8')
             msg_encoded_lenght = len(msg_encoded).to_bytes(6, "little", signed=False)
 
             if(len(msg_encoded) > MAX_MSG_LENGHT):
                 raise Exception("Message lenght to long")
 
-            self._client_socket.send_msg(BET_CODE.encode())
+            self._client_socket.send_msg(BET_CODE.encode('utf-8'))
             self._client_socket.send_msg(msg_encoded_lenght)
             self._client_socket.send_msg(msg_encoded)
             logging.debug(f"action: send_msg | result: success")
@@ -59,12 +59,12 @@ class Client:
             logging.error(f"action: send_msg | result: error | error: {e.args}")
         
     
-    def _recv_msg(self, SPECTED_CODE):
+    def _recv_msg(self, spected_code):
         try:
-            received_msg = self._client_socket.recv_msg(len(SPECTED_CODE.encode()))
-            if(received_msg != SPECTED_CODE):
+            received_msg = self._client_socket.recv_msg(len(spected_code.encode('utf-8'))).decode('utf-8')
+            if(received_msg != spected_code):
                 raise Exception("Message received not match with spected")
-            logging.debug(f"action: recv_msg | result: success | bytes_recv: {len(received_msg.encode())}")
+            logging.debug(f"action: recv_msg | result: success | msg: {received_msg}")
             return received_msg
         except Exception as e:
             logging.error(f"action: recv_msg | result: error | error: {e.args}")            

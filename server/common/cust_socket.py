@@ -27,13 +27,13 @@ class Socket:
 
             logging.debug(f"action: recv | result: success | msg: {received_msg}")
 
-            return received_msg.decode()
+            return received_msg
         except socket.error as e:
             logging.error(f"action: recv | result: error | error: {repr(e)}") 
         
     def send_msg(self, msg):
         try:
-            self._socket.sendall(msg.encode())
+            self._socket.sendall(msg)
             logging.debug(f"action: sendall | result: success | msg: {msg}")
         except socket.error as e:
             logging.error(f"action: sendall | result: error | error: {repr(e)}")
