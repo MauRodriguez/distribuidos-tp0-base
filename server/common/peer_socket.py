@@ -29,4 +29,4 @@ class PeerSocket:
             logging.error(f"action: sendall | result: error | error: {repr(e)}")
     
     def get_name(self):
-        return self._addr
+        return self._addr[0]

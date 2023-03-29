@@ -10,7 +10,7 @@ class ConnectSocket:
         try:
             self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self._socket.connect(self._address)
-            logging.debug(f"action: connect | result: success | error: {repr(e)}")
+            logging.debug(f"action: connect | result: success")
         except socket.timeout as e:
             logging.error(f"action: connect | result: error | error: {repr(e)}")
         except socket.error as e:
@@ -18,6 +18,7 @@ class ConnectSocket:
 
     def close(self):
         self._socket.close()
+        logging.debug("action: skt_close | result: success")
 
     def recv_msg(self, lenght):
         try:

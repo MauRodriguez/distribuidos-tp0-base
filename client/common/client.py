@@ -1,6 +1,6 @@
 import logging
 import time
-from connect_socket import ConnectSocket
+from .connect_socket import ConnectSocket
 MAX_MSG_LENGHT = 8000
 BET_CODE = "B"
 RESULT_CODE = "R"
@@ -18,7 +18,8 @@ class Client:
         self._client_id = config_params["id"]
         self._current_msg_id = 1
 
-        self._bet = ';'.join([config_params["apuesta_nombre"],
+        self._bet = ';'.join([str(config_params["id"]),
+                    config_params["apuesta_nombre"],
                     config_params["apuesta_apellido"],
                     config_params["apuesta_documento"],
                     config_params["apuesta_nacimiento"],
