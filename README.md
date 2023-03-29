@@ -30,3 +30,13 @@ verificar que todos los servicios terminan con exit status 0.
 
 Luego de pasar el cliente a python, en ambos programas se agrega un signal handler, que al recibir la señal SIGTERM enviaba por el docker-compose stop, detiene su ejecución por completo para ejecutar el handler. En el handler se ejecuta los cierres de sockets gracefully y se ejecuta un `sys.exit()`, de lo contrario el programa continuaria con su ejecución normal.
 El parametro -t del docker-compose stop al pasar un determinado tiempo manda un SIGKILL que evita el cierre gracefully, pero de todas formas lo dejé, subiendolo a 3, para evitar bloqueos si el programa falla en cerrar gracefully.
+
+### Ejercicio 5
+
+**Protocolo de comunicación:**
+Como protocolo de comunicación se utilizo TLV. Los distintos Types por ahora son "B" de Bet, que representa que el mensaje será el que mande el cliente al servidor con la apuesta, y el tipo "O" Ok que responde el servidor al cliente para detonar que su mensaje fue recibido.
+El Lenght de cada mensaje se codifican los ints en 6 bytes no signados, con little endian.
+El Value es codificado como chars en utf-8, y su longitud máxima no puede superar la constante MSG_MAX_LENGHT que es de 8kB. Esta verificación solo se realiza en el cliente dado que es suficiente. Si nadie le manda al servidor mensajes largos por demás, nunca debería recibir un Lenght de longitud mayor.
+
+
+Se crean los sockets de tipo connect, listen, y peer. El primero es el que usa el cliente, tiene las funciones connect y las necesarias para el socket. El segundo es el socket listener que usa el servidor para despachar conexiones, posee las funciones especiales bind and listen. Y el útlimo es el tipo de socket peer para cada cliente que maneja el server, que no posee la función connect.

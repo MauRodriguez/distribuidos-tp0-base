@@ -1,7 +1,7 @@
 import logging
 import time
 from .connect_socket import ConnectSocket
-MAX_MSG_LENGHT = 8000
+MAX_MSG_LENGHT = 8192
 BET_CODE = "B"
 RESULT_CODE = "R"
 WAIT_CODE = "W"
