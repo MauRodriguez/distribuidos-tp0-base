@@ -10,6 +10,7 @@ RESULT_CODE = "R"
 WAIT_CODE = "W"
 OK_CODE = "O"
 ASK_WINNERS_CODE = "A"
+FINISH_CODE = "F"
 
 class Client:
     def __init__(self, config_params):
@@ -22,6 +23,10 @@ class Client:
 
     def run(self):
         self._send_all_bets()
+
+        self._handle_connection("".encode('utf-8'), FINISH_CODE, OK_CODE)
+        logging.info(f"[CLIENT {self._client_id}] Finish message sent")
+
         self._ask_for_winners()        
     
     def stop(self):
@@ -56,12 +61,11 @@ class Client:
                 aux = str(self._client_id) + "," + aux + '\n'
                 all_bets.append(aux)
 
-        return all_bets
-        
+        return all_bets        
     
     def _recv_msg(self, lenght):
         try:
-            received_msg = self._client_socket.recv_msg(lenght).decode('utf-8')            
+            received_msg = self._client_socket.recv_msg(lenght)            
             logging.debug(f"action: recv_msg | result: success | msg: {received_msg}")
             return received_msg
         except Exception as e:
@@ -71,7 +75,7 @@ class Client:
         self._client_socket.connect()
 
         self._send_msg(sending_msg, sending_code.encode('utf-8'))
-        received_msg = self._recv_msg(len(spected_code.encode('utf-8')))
+        received_msg = self._recv_msg(len(spected_code.encode('utf-8'))).decode('utf-8')
         
         self._current_msg_id += 1
         self._client_socket.close()
@@ -112,7 +116,11 @@ class Client:
                 time.sleep(randrange(0,5) + 1)
                 continue
             elif response == RESULT_CODE:
-                winners_list = response.split('\n')
+
+                lenght = int.from_bytes(self._recv_msg(6), "little",signed=False)
+                winners = self._recv_msg(lenght).decode('utf-8')
+                                
+                winners_list = winners.split('\n')
                 logging.info(f"action: ask_winners | result: success | winners: {len(winners_list)}")
                 self._keep_asking = False
                 break
