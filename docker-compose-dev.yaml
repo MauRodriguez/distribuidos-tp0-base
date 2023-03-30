@@ -22,11 +22,6 @@ services:
         environment:
             - CLI_ID=1
             - CLI_LOG_LEVEL=DEBUG
-            - NOMBRE=Santiago Lionel
-            - APELLIDO=Lorca
-            - DOCUMENTO=30904465
-            - NACIMIENTO=1999-03-17
-            - NUMERO=7574
         networks:
             - testing_net
         depends_on:
@@ -41,11 +36,6 @@ services:
         environment:
             - CLI_ID=2
             - CLI_LOG_LEVEL=DEBUG
-            - NOMBRE=Sergio
-            - APELLIDO=Ramos
-            - DOCUMENTO=47904465
-            - NACIMIENTO=1999-07-17
-            - NUMERO=7578
         networks:
             - testing_net
         depends_on:
@@ -60,11 +50,6 @@ services:
         environment:
             - CLI_ID=3
             - CLI_LOG_LEVEL=DEBUG
-            - NOMBRE=Mariano
-            - APELLIDO=Lopez
-            - DOCUMENTO=30474465
-            - NACIMIENTO=1999-06-17
-            - NUMERO=7577
         networks:
             - testing_net
         depends_on:
@@ -79,11 +64,6 @@ services:
         environment:
             - CLI_ID=4
             - CLI_LOG_LEVEL=DEBUG
-            - NOMBRE=Pepe
-            - APELLIDO=Santillana
-            - DOCUMENTO=30904765
-            - NACIMIENTO=1999-05-17
-            - NUMERO=7576
         networks:
             - testing_net
         depends_on:
@@ -98,11 +78,6 @@ services:
         environment:
             - CLI_ID=5
             - CLI_LOG_LEVEL=DEBUG
-            - NOMBRE=Miguel
-            - APELLIDO=Espora
-            - DOCUMENTO=30904447
-            - NACIMIENTO=1999-04-17
-            - NUMERO=7575
         networks:
             - testing_net
         depends_on:

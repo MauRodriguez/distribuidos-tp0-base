@@ -1,11 +1,14 @@
 import logging
 import time
 from .connect_socket import ConnectSocket
+import csv
 MAX_MSG_LENGHT = 8192
 BET_CODE = "B"
 RESULT_CODE = "R"
 WAIT_CODE = "W"
 OK_CODE = "O"
+
+BETS_PER_BATCH = 40
 
 class Client:
     def __init__(self, config_params):
@@ -16,28 +19,29 @@ class Client:
         self._loop_lapse = config_params["loop_lapse"]
         self._keep_running = True
         self._client_id = config_params["id"]
-        self._current_msg_id = 1
+        self._current_msg_id = 1        
 
-        self._bet = ';'.join([str(config_params["id"]),
-                    config_params["apuesta_nombre"],
-                    config_params["apuesta_apellido"],
-                    config_params["apuesta_documento"],
-                    config_params["apuesta_nacimiento"],
-                    config_params["apuesta_numero"]])
+        
 
     def run(self):
-        #timeout = time.monotonic() + self._loop_lapse        
+        #timeout = time.monotonic() + self._loop_lapse    
 
         #while time.monotonic() < timeout and self._keep_running:
-        self._client_socket.connect()
+        all_bets = self._read_csv()
+        batch = bytearray()      
 
-        self._send_msg(self._bet)
-        self._recv_msg(OK_CODE)
+        for bet in all_bets:     
+            bet_encoded = bet.encode('utf-8')            
+            encoded_bet_lenght = len(bet_encoded).to_bytes(6, "little", signed=False)
+
+            if(len(batch) + encoded_bet_lenght) >= MAX_MSG_LENGHT:
+                self._handle_connection(batch)
+                batch = bytearray()
+            
+            batch.append(bet_encoded)
         
-        # time.sleep(self._loop_period)
+        self._handle_connection(batch)
         
-        self._current_msg_id += 1
-        self._client_socket.close()
     
     def stop(self):
         self._keep_running = False
@@ -58,6 +62,17 @@ class Client:
             logging.debug(f"action: send_msg | result: success")
         except Exception as e:
             logging.error(f"action: send_msg | result: error | error: {e.args}")
+
+    def _read_csv(self):
+        all_bets = []
+        with open(f"agency-{self._client_id}.csv","r") as file:
+            reader = csv.reader(file, delimiter='\n')
+            for i , line in enumerate(reader):
+                aux = ';'.join(line)
+                aux = str(self._client_id) + ";" + aux + '\n'
+                all_bets.append(aux)
+
+        return all_bets
         
     
     def _recv_msg(self, spected_code):
@@ -68,4 +83,13 @@ class Client:
             logging.debug(f"action: recv_msg | result: success | msg: {received_msg}")
             return received_msg
         except Exception as e:
-            logging.error(f"action: recv_msg | result: error | error: {e.args}")            
+            logging.error(f"action: recv_msg | result: error | error: {e.args}")   
+
+    def _handle_connection(self, batch):
+        self._client_socket.connect()
+
+        self._send_msg(batch)
+        self._recv_msg(OK_CODE)
+        
+        self._current_msg_id += 1
+        self._client_socket.close()         
