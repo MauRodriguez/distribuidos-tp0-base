@@ -40,3 +40,9 @@ El Value es codificado como chars en utf-8, y su longitud máxima no puede super
 
 
 Se crean los sockets de tipo connect, listen, y peer. El primero es el que usa el cliente, tiene las funciones connect y las necesarias para el socket. El segundo es el socket listener que usa el servidor para despachar conexiones, posee las funciones especiales bind and listen. Y el útlimo es el tipo de socket peer para cada cliente que maneja el server, que no posee la función connect.
+
+
+### Ejercicio 6
+
+Se agrega un reader en el cliente, y un parser tanto en client como en el server. El parser lo que hace es convertir un montón de bets en formato csv a formato batch, y en el servidor viceversa.
+El formato del batch es bet separando cada campo por ',' y luego separando cada bet entre si por '\n'. Se sigue utilizando TLV.

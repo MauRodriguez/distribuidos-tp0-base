@@ -41,7 +41,7 @@ class Server:
                 store_bets(self._bets)
                 self._bets = []
                 self._client_socket.send_msg(OK_CODE.encode('utf-8'))
-                logging.info(f'action: receive_message | result: success | ip: {addr[0]}')            
+                logging.debug(f'action: receive_message | result: success | ip: {addr}')            
             
         except OSError as e:
             logging.error("action: receive_message | result: fail | error: {e}")
