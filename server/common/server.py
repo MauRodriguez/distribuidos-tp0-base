@@ -3,6 +3,7 @@ from .peer_socket import PeerSocket
 from .listen_socket import ListenSocket
 from .utils import Bet
 from .utils import store_bets
+import re
 BET_CODE = "B"
 RESULT_CODE = "R"
 WAIT_CODE = "W"
@@ -35,11 +36,10 @@ class Server:
             msg_lenght = int.from_bytes(self._client_socket.recv_msg(6), "little",signed=False)            
             addr = self._client_socket.get_name()
             if code == BET_CODE:
-                msg_received = self._client_socket.recv_msg(msg_lenght).decode('utf-8').split(';')
-                self._bets.append(Bet( msg_received[0], msg_received[1], msg_received[2]
-                                , msg_received[3], msg_received[4], msg_received[5]))
+                msg_received = self._client_socket.recv_msg(msg_lenght).decode('utf-8')
+                self._parse_bets(msg_received)
                 store_bets(self._bets)
-                self._bets.pop()
+                self._bets = []
                 self._client_socket.send_msg(OK_CODE.encode('utf-8'))
                 logging.info(f'action: receive_message | result: success | ip: {addr[0]} | msg: {msg_received}')            
             
@@ -54,3 +54,10 @@ class Server:
         logging.info('action: accept_connections | result: in_progress')
         peer_skt = self._server_socket.accept()                
         return peer_skt
+    
+    def _parse_bets(self, msg):
+        all_bets = re.split(';|\n',msg)
+        
+        for i in range(0, len(all_bets) - 6, 6):
+            bet = Bet(msg[i], msg[i+1], msg[i+2], msg[i+3], msg[i+4], msg[i+5])
+            self._bets.append(bet)
