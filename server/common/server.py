@@ -1,6 +1,7 @@
 import logging
 from .peer_socket import PeerSocket
 from .listen_socket import ListenSocket
+import time
 from .utils import Bet
 from .utils import store_bets
 from .utils import has_won
@@ -22,6 +23,7 @@ class Server:
         self._client_socket = None
         self._keep_running = True
         self._client_finished = 0
+        self._client_notified = 0
         self._winners = {"1": "",
                          "2": "",
                          "3": "",
@@ -36,7 +38,7 @@ class Server:
         
         self._calculate_winners()
 
-        while self._keep_running and self._client_finished < CLIENTS_AMOUNT:
+        while self._keep_running and self._client_notified < CLIENTS_AMOUNT:
             self._client_socket = self._accept_new_connection()
             self._handle_client_connection()
 
@@ -51,7 +53,7 @@ class Server:
             code = self._client_socket.recv_msg(1).decode('utf-8')
             addr = self._client_socket.get_name()
             if code == BET_CODE:
-                msg_lenght = int.from_bytes(self._client_socket.recv_msg(6), "little",signed=False)            
+                msg_lenght = int.from_bytes(self._client_socket.recv_msg(2), "little",signed=False)            
                 msg_received = self._client_socket.recv_msg(msg_lenght).decode('utf-8')
 
                 self._parse_bets(msg_received)
@@ -67,19 +69,21 @@ class Server:
                 logging.info(f'action: receive_message | result: success | code: {code}')
 
             elif code == ASK_WINNERS_CODE:
-                logging.info(f'action: receive_message | result: success | code: {code}')
                 if self._client_finished < CLIENTS_AMOUNT:
                     self._client_socket.send_msg(WAIT_CODE.encode('utf-8'))
                 else:
                     self._client_socket.send_msg(RESULT_CODE.encode('utf-8'))
-                    
-                    msg_lenght = int.from_bytes(self._client_socket.recv_msg(6), "little",signed=False)
+                    logging.info(f'action: receive_message | result: success | code: {code}')
+                    self._client_socket = self._accept_new_connection()
+
+                    msg_lenght = int.from_bytes(self._client_socket.recv_msg(2), "little",signed=False)                    
                     client_name = self._client_socket.recv_msg(msg_lenght).decode('utf-8')
                     
                     encoded_winners = self._winners[client_name].encode('utf-8')
 
-                    self._client_socket.send_msg(len(encoded_winners).to_bytes(6, "little", signed=False))
-                    self._client_socket.send_msg(encoded_winners)         
+                    self._client_socket.send_msg(len(encoded_winners).to_bytes(2, "little", signed=False))
+                    self._client_socket.send_msg(encoded_winners)   
+                    self._client_notified += 1    
             
         except OSError as e:
             logging.error("action: receive_message | result: fail | error: {e}")
@@ -101,14 +105,13 @@ class Server:
             bet = Bet(all_bets[i], all_bets[i+1], all_bets[i+2], all_bets[i+3], all_bets[i+4], all_bets[i+5])
             self._bets.append(bet)
             
-    def calculate_winners(self):
+    def _calculate_winners(self):
         bets = load_bets()
 
         for bet in bets:
             if has_won(bet):
-                self._winners[bet.agency] += (str(bet.document) + ",")
-        
-        CLIENTS_AMOUNT = 0
+                self._winners[str(bet.agency)] += (str(bet.document) + ",")
+        logging.info('action: calculating winners | result: finish')
 
         
         

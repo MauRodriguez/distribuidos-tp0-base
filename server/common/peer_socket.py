@@ -13,7 +13,7 @@ class PeerSocket:
         try:
             received_msg = self._socket.recv(lenght)
             while len(received_msg) < lenght:
-                received_msg = received_msg + (self._socket.recv(lenght - len(received_msg)))
+                received_msg = received_msg + (self._socket.recv(lenght - len(received_msg)))                
 
             logging.debug(f"action: recv | result: success")
 
