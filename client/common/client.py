@@ -115,19 +115,23 @@ class Client:
 
     def _ask_for_winners(self):
 
-        while self._keep_asking:
-            response = self._handle_connection("".encode('utf-8'), ASK_WINNERS_CODE, RESULT_CODE)
+        while self._keep_asking:            
+            self._client_socket.connect()
+            self._send_msg("".encode('utf-8'), ASK_WINNERS_CODE.encode('utf-8'))
             
+            msg_encoded = str(self._client_id).encode('utf-8')                
+            msg_encoded_lenght = len(msg_encoded).to_bytes(2, "little", signed=False)
+            
+            self._client_socket.send_msg(msg_encoded_lenght)             
+            self._client_socket.send_msg(msg_encoded)
+            response = self._recv_msg(len(RESULT_CODE.encode('utf-8')))
+            
+            self._current_msg_id += 1
             if response == WAIT_CODE or response == None:                
                 time.sleep(randrange(0,5) + 1)
+                self._client_socket.close()
                 continue
-            elif response == RESULT_CODE:
-                msg_encoded = str(self._client_id).encode('utf-8')                
-                msg_encoded_lenght = len(msg_encoded).to_bytes(2, "little", signed=False) 
-
-                self._client_socket.connect() 
-                self._client_socket.send_msg(msg_encoded_lenght)             
-                self._client_socket.send_msg(msg_encoded)
+            elif response == RESULT_CODE:                
 
                 lenght = int.from_bytes(self._recv_msg(2), "little",signed=False)
                 winners = self._recv_msg(lenght).decode('utf-8')
@@ -138,7 +142,8 @@ class Client:
                 self._client_socket.close()
                 break
             else:
-                try:    
+                try:
+                    self._client_socket.close()    
                     raise Exception("Message received not match with spected")
                 except Exception as e:
                     logging.error(f"action: recv_msg | result: error | error: {e.args}")           
