@@ -21,8 +21,6 @@ class Client:
         self._client_id = config_params["id"]
         self._current_msg_id = 1        
 
-        
-
     def run(self):
         #timeout = time.monotonic() + self._loop_lapse    
 
@@ -48,9 +46,8 @@ class Client:
         self._client_socket.close()
         logging.info(f"[CLIENT {self._client_id}] Gracefully closing client socket")
 
-    def _send_msg(self, msg):
+    def _send_msg(self, msg_encoded):
         try:
-            msg_encoded = msg.encode('utf-8')
             msg_encoded_lenght = len(msg_encoded).to_bytes(6, "little", signed=False)
 
             if len(msg_encoded) > MAX_MSG_LENGHT:

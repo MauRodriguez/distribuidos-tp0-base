@@ -20,11 +20,6 @@ def initialize_config():
         config_params["logging_level"] = os.getenv("CLI_LOGGING_LEVEL", config["DEFAULT"]["CLI_LOGGING_LEVEL"])
         config_params["loop_lapse"] = int(os.getenv("CLI_LOOP_LAPSE", config["DEFAULT"]["CLI_LOOP_LAPSE"]))
         config_params["loop_period"] = int(os.getenv("CLI_LOOP_PERIOD", config["DEFAULT"]["CLI_LOOP_PERIOD"]))
-        config_params["apuesta_nombre"] = os.getenv("NOMBRE")
-        config_params["apuesta_apellido"] = os.getenv("APELLIDO")
-        config_params["apuesta_documento"] = os.getenv("DOCUMENTO")
-        config_params["apuesta_nacimiento"] = os.getenv("NACIMIENTO")
-        config_params["apuesta_numero"] = os.getenv("NUMERO")
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting server".format(e))
     except ValueError as e:
