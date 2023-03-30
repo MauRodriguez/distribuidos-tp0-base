@@ -47,7 +47,8 @@ class Server:
             new_thread = threading.Thread(target = self._handle_client_connection, args=(client_socket,))
             self._threads.append(new_thread)
             new_thread.start()
-        
+        if self._finished_mtx.locked(): 
+            self._finished_mtx.release()
         self._calculate_winners()
 
         while self._notified_mtx.acquire() and self._keep_running and self._client_notified < CLIENTS_AMOUNT:
@@ -59,6 +60,9 @@ class Server:
             new_thread = threading.Thread(target = self._handle_client_connection, args=(client_socket,))
             self._threads.append(new_thread)
             new_thread.start()
+
+        if self._notified_mtx.locked(): 
+            self._notified_mtx.release()
 
         self._clear_threads()    
 
@@ -116,6 +120,8 @@ class Server:
             
         except OSError as e:
             logging.error("action: receive_message | result: fail | error: {e}")
+        except Exception as e:
+            logging.error("action: error neuvop | result: fail | error: {e}")
         finally:
             self._semaphore.release()
             logging.debug("action: client_close | result: success")

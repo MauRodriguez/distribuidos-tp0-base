@@ -49,7 +49,7 @@ class Client:
 
             logging.debug(f"action: send_msg | result: success")
         except Exception as e:
-            logging.error(f"action: send_msg | result: error | error: {e.args}")
+            logging.error(f"action: send_msg | result: error | error: {e.args} {msg_encoded.decode()} {len(msg_encoded)}")
 
     def _read_csv(self):
         all_bets = []
@@ -97,11 +97,11 @@ class Client:
             if(len(batch) + len(bet_encoded)) >= MAX_MSG_LENGHT:
                 try:
                     response = self._handle_connection(batch, BET_CODE, OK_CODE)
+                    batch = "".encode('utf-8')
                     if response != OK_CODE:
                         raise Exception("Message received not match with spected")
-                    batch = "".encode('utf-8')
                 except Exception as e:
-                    logging.error(f"action: recv_msg | result: error | error: {e.args}")
+                    logging.error(f"action: recv_msg | result: error | error: {e.args} {response}")
             
             batch = batch + bet_encoded
         if len(batch) != 0:
@@ -129,10 +129,10 @@ class Client:
             self._current_msg_id += 1
             if response == WAIT_CODE or response == None:                
                 time.sleep(randrange(0,5) + 1)
-                self._client_socket.close()
+                self._client_socket.close()                
                 continue
-            elif response == RESULT_CODE:                
-
+            elif response == RESULT_CODE:
+                
                 lenght = int.from_bytes(self._recv_msg(2), "little",signed=False)
                 winners = self._recv_msg(lenght).decode('utf-8')
 

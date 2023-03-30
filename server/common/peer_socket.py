@@ -26,7 +26,7 @@ class PeerSocket:
             self._socket.sendall(msg)
             logging.debug(f"action: sendall | result: success")
         except socket.error as e:
-            logging.error(f"action: sendall | result: error | error: {repr(e)}")
+            logging.error(f"action: sendall | result: error | error: {repr(e)} {msg.decode()}")
     
     def get_name(self):
         return self._addr[0]
