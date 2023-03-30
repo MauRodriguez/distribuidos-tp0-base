@@ -46,3 +46,9 @@ Se crean los sockets de tipo connect, listen, y peer. El primero es el que usa e
 
 Se agrega un reader en el cliente, y un parser tanto en client como en el server. El parser lo que hace es convertir un montón de bets en formato csv a formato batch, y en el servidor viceversa.
 El formato del batch es bet separando cada campo por ',' y luego separando cada bet entre si por '\n'. Se sigue utilizando TLV.
+
+
+### Ejercicio 7
+
+**Protocolo de comunicación**:
+Se agrega la parte del protocolo de comunicación para cuando el cliente pide los winners. Una vez que termina de mandar todos los mensajes, manda finish 'F' y el servidor lo recibe como un cliente terminado. Desde entonces el cliente comienza a hacer ping al servidor con mensajes de tipo 'A' asking_for_winners, y el servidor le puede responder con 'W' wait_code o con un 'R' result_code. Si le responde con un result_code el cliente le envia su nombre y seguido de esto el servidor le envia sus respectivos winners.
