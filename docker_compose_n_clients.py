@@ -17,7 +17,7 @@ def main():
     "        entrypoint: python3 /main.py\n",
     "        environment:\n",
     "            - PYTHONUNBUFFERED=1\n",
-    "            - LOGGING_LEVEL=DEBUG\n",
+    "            - LOGGING_LEVEL=INFO\n",
     "        networks:\n",
     "            - testing_net\n\n"
     ]
@@ -34,7 +34,7 @@ def main():
         "        entrypoint: python3 /main.py\n",
         "        environment:\n",
         "            - CLI_ID=" + str(i) + "\n",
-        "            - CLI_LOG_LEVEL=DEBUG\n",
+        "            - CLI_LOG_LEVEL=INFO\n",
         "        networks:\n",
         "            - testing_net\n",
         "        depends_on:\n",

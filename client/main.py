@@ -18,8 +18,6 @@ def initialize_config():
         config_params["id"] = int(os.getenv("CLI_ID", config["DEFAULT"]["CLI_ID"]))
         config_params["server_address"] = os.getenv("CLI_SERVER_ADDRESS", config["DEFAULT"]["CLI_SERVER_ADDRESS"])
         config_params["logging_level"] = os.getenv("CLI_LOGGING_LEVEL", config["DEFAULT"]["CLI_LOGGING_LEVEL"])
-        config_params["loop_lapse"] = int(os.getenv("CLI_LOOP_LAPSE", config["DEFAULT"]["CLI_LOOP_LAPSE"]))
-        config_params["loop_period"] = int(os.getenv("CLI_LOOP_PERIOD", config["DEFAULT"]["CLI_LOOP_PERIOD"]))
     except KeyError as e:
         raise KeyError("Key was not found. Error: {} .Aborting server".format(e))
     except ValueError as e:

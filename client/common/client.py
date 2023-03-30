@@ -16,16 +16,11 @@ class Client:
         split_info = config_params["server_address"].split(":")
 
         self._client_socket = ConnectSocket((split_info[0],int(split_info[1])))
-        self._loop_period = config_params["loop_period"]
-        self._loop_lapse = config_params["loop_lapse"]
         self._keep_asking = True
         self._client_id = config_params["id"]
         self._current_msg_id = 1        
 
     def run(self):
-        #timeout = time.monotonic() + self._loop_lapse    
-
-        #while time.monotonic() < timeout and self._keep_running:
         self._send_all_bets()
         self._ask_for_winners()        
     
