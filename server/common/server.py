@@ -41,7 +41,7 @@ class Server:
                 store_bets(self._bets)
                 self._bets = []
                 self._client_socket.send_msg(OK_CODE.encode('utf-8'))
-                logging.info(f'action: receive_message | result: success | ip: {addr[0]} | msg: {msg_received}')            
+                logging.info(f'action: receive_message | result: success | ip: {addr[0]}')            
             
         except OSError as e:
             logging.error("action: receive_message | result: fail | error: {e}")
@@ -56,8 +56,9 @@ class Server:
         return peer_skt
     
     def _parse_bets(self, msg):
-        all_bets = re.split(';|\n',msg)
+        all_bets = re.split(',|\n',msg)
         
         for i in range(0, len(all_bets) - 6, 6):
-            bet = Bet(msg[i], msg[i+1], msg[i+2], msg[i+3], msg[i+4], msg[i+5])
+            
+            bet = Bet(all_bets[i], all_bets[i+1], all_bets[i+2], all_bets[i+3], all_bets[i+4], all_bets[i+5])
             self._bets.append(bet)

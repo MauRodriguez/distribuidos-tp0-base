@@ -24,9 +24,9 @@ class ConnectSocket:
         try:
             received_msg = self._socket.recv(lenght)
             while len(received_msg) < lenght:
-                received_msg.append(self._socket.recv(lenght - len(received_msg)))
+                received_msg = received_msg + (self._socket.recv(lenght - len(received_msg)))
 
-            logging.debug(f"action: recv | result: success | msg: {received_msg}")
+            logging.debug(f"action: recv | result: success")
 
             return received_msg
         except socket.error as e:
@@ -35,6 +35,6 @@ class ConnectSocket:
     def send_msg(self, msg):
         try:
             self._socket.sendall(msg)
-            logging.debug(f"action: sendall | result: success | msg: {msg}")
+            logging.debug(f"action: sendall | result: success")
         except socket.error as e:
             logging.error(f"action: sendall | result: error | error: {repr(e)}")

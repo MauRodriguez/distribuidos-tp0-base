@@ -2,6 +2,7 @@ import logging
 import time
 from .connect_socket import ConnectSocket
 import csv
+import os
 MAX_MSG_LENGHT = 8192
 BET_CODE = "B"
 RESULT_CODE = "R"
@@ -26,19 +27,19 @@ class Client:
 
         #while time.monotonic() < timeout and self._keep_running:
         all_bets = self._read_csv()
-        batch = bytearray()      
+        batch = "".encode('utf-8')
 
         for bet in all_bets:     
-            bet_encoded = bet.encode('utf-8')            
-            encoded_bet_lenght = len(bet_encoded).to_bytes(6, "little", signed=False)
+            bet_encoded = bet.encode('utf-8')
 
-            if(len(batch) + encoded_bet_lenght) >= MAX_MSG_LENGHT:
+            if(len(batch) + len(bet_encoded)) >= MAX_MSG_LENGHT:
                 self._handle_connection(batch)
-                batch = bytearray()
+                batch = "".encode('utf-8')
             
-            batch.append(bet_encoded)
-        
-        self._handle_connection(batch)
+            batch = batch + bet_encoded
+        if len(batch) != 0:
+            self._handle_connection(batch)
+        logging.info(f"[CLIENT {self._client_id}] finished")
         
     
     def stop(self):
@@ -62,11 +63,14 @@ class Client:
 
     def _read_csv(self):
         all_bets = []
-        with open(f"agency-{self._client_id}.csv","r") as file:
+
+        filename = os.path.join(os.path.dirname(__file__),f"./dataset/agency-{self._client_id}.csv")
+
+        with open(filename,"r") as file:
             reader = csv.reader(file, delimiter='\n')
             for i , line in enumerate(reader):
-                aux = ';'.join(line)
-                aux = str(self._client_id) + ";" + aux + '\n'
+                aux = ','.join(line)
+                aux = str(self._client_id) + "," + aux + '\n'
                 all_bets.append(aux)
 
         return all_bets
