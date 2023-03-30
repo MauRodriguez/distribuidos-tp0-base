@@ -115,12 +115,17 @@ class Client:
             if response == WAIT_CODE:
                 time.sleep(randrange(0,5) + 1)
                 continue
-            elif response == RESULT_CODE:
+            elif response == OK_CODE:
+                msg_encoded = self._client_id.encode('utf-8')
+                msg_encoded_lenght = len(msg_encoded).to_bytes(6, "little", signed=False)
+
+                self._client_socket.send_msg(msg_encoded_lenght)
+                self._client_socket.send_msg(msg_encoded)
 
                 lenght = int.from_bytes(self._recv_msg(6), "little",signed=False)
                 winners = self._recv_msg(lenght).decode('utf-8')
-                                
-                winners_list = winners.split('\n')
+
+                winners_list = winners.split(',')
                 logging.info(f"action: ask_winners | result: success | winners: {len(winners_list)}")
                 self._keep_asking = False
                 break

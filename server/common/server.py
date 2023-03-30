@@ -3,12 +3,16 @@ from .peer_socket import PeerSocket
 from .listen_socket import ListenSocket
 from .utils import Bet
 from .utils import store_bets
+from .utils import has_won
+from .utils import load_bets
 import re
 BET_CODE = "B"
 RESULT_CODE = "R"
 WAIT_CODE = "W"
 OK_CODE = "O"
-CLIENT_NUMBER = 5
+ASK_WINNERS_CODE = "A"
+FINISH_CODE = "F"
+CLIENTS_AMOUNT = 5
 
 class Server:
     def __init__(self, port, listen_backlog):        
@@ -18,11 +22,23 @@ class Server:
         self._client_socket = None
         self._keep_running = True
         self._client_finished = 0
+        self._winners = {"1": "",
+                         "2": "",
+                         "3": "",
+                         "4": "",
+                         "5": ""
+                         }
 
     def run(self):    
-        while self._keep_running:
+        while self._keep_running and self._client_finished < CLIENTS_AMOUNT:
             self._client_socket = self._accept_new_connection()
-            self._handle_client_connection(BET_CODE)
+            self._handle_client_connection()
+        
+        self._calculate_winners()
+
+        while self._keep_running and self._client_finished < CLIENTS_AMOUNT:
+            self._client_socket = self._accept_new_connection()
+            self._handle_client_connection()
 
     def stop(self):
         self._keep_running = False
@@ -30,18 +46,40 @@ class Server:
         self._server_socket.close()
         logging.info("Gracefully closing server sockets")
 
-    def _handle_client_connection(self, spected_code):
+    def _handle_client_connection(self):
         try:            
-            code = self._client_socket.recv_msg(len(spected_code.encode())).decode('utf-8')
-            msg_lenght = int.from_bytes(self._client_socket.recv_msg(6), "little",signed=False)            
+            code = self._client_socket.recv_msg(1).decode('utf-8')
             addr = self._client_socket.get_name()
             if code == BET_CODE:
+                msg_lenght = int.from_bytes(self._client_socket.recv_msg(6), "little",signed=False)            
                 msg_received = self._client_socket.recv_msg(msg_lenght).decode('utf-8')
+
                 self._parse_bets(msg_received)
                 store_bets(self._bets)
                 self._bets = []
+
                 self._client_socket.send_msg(OK_CODE.encode('utf-8'))
-                logging.debug(f'action: receive_message | result: success | ip: {addr}')            
+                logging.debug(f'action: receive_message | result: success | code: {code}')
+
+            elif code == FINISH_CODE:
+                self._client_finished += 1
+                self._client_socket.send_msg(OK_CODE.encode('utf-8'))
+                logging.info(f'action: receive_message | result: success | code: {code}')
+
+            elif code == ASK_WINNERS_CODE:
+                logging.info(f'action: receive_message | result: success | code: {code}')
+                if self._client_finished < CLIENTS_AMOUNT:
+                    self._client_socket.send_msg(WAIT_CODE.encode('utf-8'))
+                else:
+                    self._client_socket.send_msg(RESULT_CODE.encode('utf-8'))
+                    
+                    msg_lenght = int.from_bytes(self._client_socket.recv_msg(6), "little",signed=False)
+                    client_name = self._client_socket.recv_msg(msg_lenght).decode('utf-8')
+                    
+                    encoded_winners = self._winners[client_name].encode('utf-8')
+
+                    self._client_socket.send_msg(len(encoded_winners).to_bytes(6, "little", signed=False))
+                    self._client_socket.send_msg(encoded_winners)         
             
         except OSError as e:
             logging.error("action: receive_message | result: fail | error: {e}")
@@ -62,3 +100,15 @@ class Server:
             
             bet = Bet(all_bets[i], all_bets[i+1], all_bets[i+2], all_bets[i+3], all_bets[i+4], all_bets[i+5])
             self._bets.append(bet)
+            
+    def calculate_winners(self):
+        bets = load_bets()
+
+        for bet in bets:
+            if has_won(bet):
+                self._winners[bet.agency] += (str(bet.document) + ",")
+        
+        CLIENTS_AMOUNT = 0
+
+        
+        

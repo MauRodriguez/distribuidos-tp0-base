@@ -27,61 +27,61 @@ services:
         depends_on:
             - server
 
-    client2:
-        container_name: client2
-        volumes:
-            - ./client/config.ini:/config.ini
-        image: client:latest
-        entrypoint: python3 /main.py
-        environment:
-            - CLI_ID=2
-            - CLI_LOG_LEVEL=INFO
-        networks:
-            - testing_net
-        depends_on:
-            - server
+    # client2:
+    #     container_name: client2
+    #     volumes:
+    #         - ./client/config.ini:/config.ini
+    #     image: client:latest
+    #     entrypoint: python3 /main.py
+    #     environment:
+    #         - CLI_ID=2
+    #         - CLI_LOG_LEVEL=INFO
+    #     networks:
+    #         - testing_net
+    #     depends_on:
+    #         - server
 
-    client3:
-        container_name: client3
-        volumes:
-            - ./client/config.ini:/config.ini
-        image: client:latest
-        entrypoint: python3 /main.py
-        environment:
-            - CLI_ID=3
-            - CLI_LOG_LEVEL=INFO
-        networks:
-            - testing_net
-        depends_on:
-            - server
+    # client3:
+    #     container_name: client3
+    #     volumes:
+    #         - ./client/config.ini:/config.ini
+    #     image: client:latest
+    #     entrypoint: python3 /main.py
+    #     environment:
+    #         - CLI_ID=3
+    #         - CLI_LOG_LEVEL=INFO
+    #     networks:
+    #         - testing_net
+    #     depends_on:
+    #         - server
 
-    client4:
-        container_name: client4
-        volumes:
-            - ./client/config.ini:/config.ini
-        image: client:latest
-        entrypoint: python3 /main.py
-        environment:
-            - CLI_ID=4
-            - CLI_LOG_LEVEL=INFO
-        networks:
-            - testing_net
-        depends_on:
-            - server
+    # client4:
+    #     container_name: client4
+    #     volumes:
+    #         - ./client/config.ini:/config.ini
+    #     image: client:latest
+    #     entrypoint: python3 /main.py
+    #     environment:
+    #         - CLI_ID=4
+    #         - CLI_LOG_LEVEL=INFO
+    #     networks:
+    #         - testing_net
+    #     depends_on:
+    #         - server
 
-    client5:
-        container_name: client5
-        volumes:
-            - ./client/config.ini:/config.ini
-        image: client:latest
-        entrypoint: python3 /main.py
-        environment:
-            - CLI_ID=5
-            - CLI_LOG_LEVEL=INFO
-        networks:
-            - testing_net
-        depends_on:
-            - server
+    # client5:
+    #     container_name: client5
+    #     volumes:
+    #         - ./client/config.ini:/config.ini
+    #     image: client:latest
+    #     entrypoint: python3 /main.py
+    #     environment:
+    #         - CLI_ID=5
+    #         - CLI_LOG_LEVEL=INFO
+    #     networks:
+    #         - testing_net
+    #     depends_on:
+    #         - server
 
 networks:
     testing_net:
