@@ -38,7 +38,7 @@ class Client:
 
     def _send_msg(self, msg_encoded, sending_code_encoded):
         try:
-            msg_encoded_lenght = len(msg_encoded).to_bytes(2, "little", signed=False)
+            msg_encoded_lenght = len(msg_encoded).to_bytes(4, "little", signed=False)
 
             if len(msg_encoded) > MAX_MSG_LENGHT:
                 raise Exception("Message lenght to long")
@@ -118,20 +118,20 @@ class Client:
 
         while self._keep_asking:
             response = self._handle_connection("".encode('utf-8'), ASK_WINNERS_CODE, RESULT_CODE)
-            
             if response == WAIT_CODE or response == None:                
                 time.sleep(randrange(1,6))
                 continue
             elif response == RESULT_CODE:
                 msg_encoded = str(self._client_id).encode('utf-8')                
-                msg_encoded_lenght = len(msg_encoded).to_bytes(2, "little", signed=False) 
-
+                msg_encoded_lenght = len(msg_encoded).to_bytes(4, "little", signed=False) 
                 
-                self._client_socket.send_msg(msg_encoded_lenght)             
+                self._client_socket.send_msg(msg_encoded_lenght)           
                 self._client_socket.send_msg(msg_encoded)
 
-                lenght = int.from_bytes(self._recv_msg(2), "little",signed=False)
+                lenght = int.from_bytes(self._recv_msg(4), "little",signed=False)
+                logging.info(f"asking for winners len  {lenght}")
                 winners = self._recv_msg(lenght).decode('utf-8')
+                logging.info(f"asking for winners msg  {winners}") 
 
                 winners_list = winners.split(',')
                 logging.info(f"action: ask_winners | result: success | winners: {len(winners_list) - 1}")
