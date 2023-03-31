@@ -14,7 +14,7 @@ WAIT_CODE = "W"
 OK_CODE = "O"
 ASK_WINNERS_CODE = "A"
 FINISH_CODE = "F"
-CLIENTS_AMOUNT = 1
+CLIENTS_AMOUNT = 5
 
 class Server:
     def __init__(self, port, listen_backlog):        
