@@ -22,12 +22,14 @@ class Client:
         self._current_msg_id = 1        
 
     def run(self):
+        self._client_socket.connect()
         self._send_all_bets()
 
         self._handle_connection("".encode('utf-8'), FINISH_CODE, OK_CODE)
         logging.info(f"[CLIENT {self._client_id}] Finish message sent")
 
-        self._ask_for_winners()        
+        self._ask_for_winners()
+        self._client_socket.close()        
     
     def stop(self):
         self._keep_running = False
@@ -74,13 +76,12 @@ class Client:
             logging.error(f"action: recv_msg | result: error | error: {e.args}")   
 
     def _handle_connection(self, sending_msg, sending_code, spected_code):
-        self._client_socket.connect()
 
         self._send_msg(sending_msg, sending_code.encode('utf-8'))
         received_msg = self._recv_msg(len(spected_code.encode('utf-8')))
         
         self._current_msg_id += 1
-        self._client_socket.close()
+        
 
         if received_msg == None:
             return received_msg      
@@ -97,9 +98,9 @@ class Client:
             if(len(batch) + len(bet_encoded)) >= MAX_MSG_LENGHT:
                 try:
                     response = self._handle_connection(batch, BET_CODE, OK_CODE)
+                    batch = "".encode('utf-8')
                     if response != OK_CODE:
                         raise Exception("Message received not match with spected")
-                    batch = "".encode('utf-8')
                 except Exception as e:
                     logging.error(f"action: recv_msg | result: error | error: {e.args}")
             
@@ -119,13 +120,13 @@ class Client:
             response = self._handle_connection("".encode('utf-8'), ASK_WINNERS_CODE, RESULT_CODE)
             
             if response == WAIT_CODE or response == None:                
-                time.sleep(randrange(0,5) + 1)
+                time.sleep(randrange(1,6))
                 continue
             elif response == RESULT_CODE:
                 msg_encoded = str(self._client_id).encode('utf-8')                
                 msg_encoded_lenght = len(msg_encoded).to_bytes(2, "little", signed=False) 
 
-                self._client_socket.connect() 
+                
                 self._client_socket.send_msg(msg_encoded_lenght)             
                 self._client_socket.send_msg(msg_encoded)
 
@@ -135,7 +136,6 @@ class Client:
                 winners_list = winners.split(',')
                 logging.info(f"action: ask_winners | result: success | winners: {len(winners_list) - 1}")
                 self._keep_asking = False
-                self._client_socket.close()
                 break
             else:
                 try:    
