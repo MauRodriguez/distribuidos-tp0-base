@@ -52,3 +52,7 @@ El formato del batch es bet separando cada campo por ',' y luego separando cada 
 
 **Protocolo de comunicación**:
 Se agrega la parte del protocolo de comunicación para cuando el cliente pide los winners. Una vez que termina de mandar todos los mensajes, manda finish 'F' y el servidor lo recibe como un cliente terminado. Desde entonces el cliente comienza a hacer ping al servidor con mensajes de tipo 'A' asking_for_winners, y el servidor le puede responder con 'W' wait_code o con un 'R' result_code. Si le responde con un result_code el cliente le envia su nombre y seguido de esto el servidor le envia sus respectivos winners.
+
+
+### Ejercicio 8
+**Concurrencia**: se lanza un hilo por cliente, en cada uno de estos se realiza la comunicación con los mismos de principio a fin (desde las bets hasta obtener los winners). Hay un lock que se comparte tanto para escritura o lectura del archivo donde se guardan las bets, y otro lock que encapsula la variable _clients_finished que indica si todos los clientes ya terminaron o no. Al finalizar cada hilo se joinea.
